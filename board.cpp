@@ -16,7 +16,7 @@ Board::Board(const Matrix &matrix, int dimension) {
 
 Board::Board() {}
 
-Cell Board::find_white_position() {
+Position Board::find_white_position() {
     for (int i = 0; i < this->dimension; i++) {
         for (int j = 0; j < this->dimension; j++) {
             if (this->matrix[i][j] == Board::WHITE_POSITION) {
@@ -31,7 +31,7 @@ Matrix Board::get_matrix() {
     return this->matrix;
 }
 
-Cell Board::get_white_position() {
+Position Board::get_white_position() {
     return this->white_position;
 }
 
@@ -46,4 +46,13 @@ void Board::print() {
         }
         std::cout << std::endl;
     }
+}
+
+// Overloading operators
+bool Board::operator==(const Board board) {
+    return this->matrix == board.matrix;
+}
+
+bool Board::operator!=(const Board board) {
+    return this->matrix != board.matrix;
 }

@@ -2,12 +2,8 @@
 #define _PUZZLE_
 
 #include "board.hpp"
-
-class Node {
-    private:
-        Board board;
-        Board parent;
-};
+#include "node.hpp"
+#include <vector>
 
 class Puzzle {
     private:
