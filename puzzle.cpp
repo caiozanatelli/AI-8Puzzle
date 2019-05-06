@@ -1,5 +1,6 @@
 #include "puzzle.hpp"
 #include "board.hpp"
+#include "node.hpp"
 #include <vector>
 
 Puzzle::Puzzle(Board &initial_state) {

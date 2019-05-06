@@ -1,9 +1,11 @@
 #include <iostream>
 #include <vector>
+#include <deque>
 #include "board.hpp"
 
 class Node {
     private:
+        std::vector<int> moves;
         Board state;
         Node *parent;
         int depth;
@@ -14,17 +16,22 @@ class Node {
     public:
         // Public methods
         Node(Board &board);
-        Node(Board &board, int costfn);
-        Node(Board &board, int costfn, Node *parent);
+        Node(Board &board, int move);
+        Node(Board &board, Node *parent, int move);
+        //Node(Board &board, int costfn);
+        //Node(Board &board, int costfn, Node *parent);
         std::vector<Node> expand();
-        void update(Node *new_parent, int new_depth, int new_cost);
-        
+        void update(Node **new_parent, int new_depth, int new_cost);
+        void print_solution();
+
         // Getters
         int get_costfn();
         int get_cost();
         int get_depth();
         Node *get_parent();
         Board get_state();
+        std::deque<Node*> generate_children();
+        std::vector<int> get_moves();
         
         // Overloading operators
         bool operator <(Node *node);

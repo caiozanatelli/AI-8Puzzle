@@ -4,6 +4,8 @@
 #include <vector>
 #include "board.hpp"
 
+const std::vector<int> Board::moves({UP, DOWN, LEFT, RIGHT});
+
 Board::Board(const Matrix &matrix, int dimension) {
     if (dimension != (int) matrix.size()) {
         std::cout << "Selected dimension does not match the matrix." << std::endl;
@@ -37,6 +39,38 @@ Position Board::get_white_position() {
 
 int Board::get_dimension() {
     return this->dimension;
+}
+
+void swap(int &x, int &y) {
+    int aux = x;
+    x = y;
+    y = aux;
+}
+
+void Board::move(int direction) {
+    int row  = this->white_position.row;
+    int col  = this->white_position.col;
+    int size = this->dimension;
+
+    if (row < 0 || row >= this->dimension || col < 0 || col >= this->dimension) {
+        return;
+    }
+    if (direction == Board::UP && row > 0) {
+        swap(this->matrix[row][col], this->matrix[row - 1][col]);
+        this->white_position.row = row - 1;
+    }
+    else if (direction == Board::DOWN && row < size - 1) {
+        swap(this->matrix[row][col], this->matrix[row + 1][col]);
+        this->white_position.row = row + 1;
+    }
+    else if (direction == Board::LEFT && col > 0) {
+        swap(this->matrix[row][col], this->matrix[row][col - 1]);
+        this->white_position.col = col - 1;
+    }
+    else if (direction == Board::RIGHT && col < size - 1) {
+        swap(this->matrix[row][col], this->matrix[row][col + 1]);
+        this->white_position.col = col + 1;
+    }
 }
 
 void Board::print() {

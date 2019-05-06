@@ -2,7 +2,7 @@
 #define _PUZZLE_
 
 #include "board.hpp"
-#include "node.hpp"
+//#include "node.hpp"
 #include <vector>
 
 class Puzzle {
