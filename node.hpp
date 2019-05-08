@@ -1,3 +1,6 @@
+#ifndef _NODE_
+#define _NODE_
+
 #include <iostream>
 #include <vector>
 #include <deque>
@@ -23,6 +26,7 @@ class Node {
         std::vector<Node> expand();
         void update(Node **new_parent, int new_depth, int new_cost);
         void print_solution();
+        void free();
 
         // Getters
         int get_costfn();
@@ -39,3 +43,5 @@ class Node {
         bool operator ==(Node *node);
         bool operator !=(Node *node);
 };
+
+#endif

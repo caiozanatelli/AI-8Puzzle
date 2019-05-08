@@ -2,6 +2,7 @@
 #include <utility>
 #include <iomanip>
 #include <vector>
+#include <cmath>
 #include "board.hpp"
 
 const std::vector<int> Board::moves({UP, DOWN, LEFT, RIGHT});
@@ -39,6 +40,21 @@ Position Board::get_white_position() {
 
 int Board::get_dimension() {
     return this->dimension;
+}
+
+int Board::get_manhattan_distance() {
+    int count = 0;
+    int dimension = this->dimension;
+
+    for (int i = 0; i < dimension; i++) {
+        for (int j = 0; j < dimension; j++) {
+            int cell = matrix[i][j];
+            int row = (cell != 0) ? std::floor((cell - 1) / dimension) : dimension - 1;
+            int col = (cell % dimension != 0) ? (cell % dimension) - 1 : dimension - 1;
+            count += std::abs(i - row) + std::abs(j - col);
+        }
+    }
+    return count;
 }
 
 void swap(int &x, int &y) {

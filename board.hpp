@@ -10,8 +10,6 @@
 typedef std::vector<std::vector<int> > Matrix;
 typedef std::pair<int, int> Position;
 
-//class Board;
-
 class Board {
     private:
         int dimension;
@@ -34,6 +32,7 @@ class Board {
         Matrix get_matrix();
         Position get_white_position();
         int get_dimension();
+        int get_manhattan_distance();
         void move(int direction);
         void print(); 
 

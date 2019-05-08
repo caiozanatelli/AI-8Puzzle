@@ -43,6 +43,13 @@ Node::Node(Board &board, Node *parent, int move) {
     this->moves.push_back(move);
 }
 
+void Node::free() {
+    if (this->parent != nullptr) {
+        this->parent->free();
+    }
+    delete this;
+}
+
 /*Node::Node(Board &board, int costfn) {
     this->state  = board;
     this->parent = nullptr;
