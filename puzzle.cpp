@@ -5,6 +5,7 @@
 #include <utility>
 #include <vector>
 #include <deque>
+#include <stack>
 #include <set>
 
 Puzzle::Puzzle(Board &initial_state) {
@@ -33,9 +34,8 @@ Node* Puzzle::solve(Algorithm algorithm) {
         case BFS:
             solution = this->bfs();
             break;
-        case DFS:
-            solution = this->dfs();
-            break;
+        case IDS:
+            solution = this->ids();
         case AStar:
             solution = this->a_star();
             break;
@@ -46,6 +46,22 @@ Node* Puzzle::solve(Algorithm algorithm) {
             std::cout << "This algorithm is not supported." << std::endl;
     }
     return solution;
+}
+
+void free_frontier(std::vector<Node*> &frontier) {
+    while (!frontier.empty()) {
+        Node *node = frontier.back();
+        frontier.pop_back();
+        delete node;
+    }
+}
+
+void free_frontier(std::deque<Node*> &frontier) {
+    while (!frontier.empty()) {
+        Node *node = frontier.front();
+        frontier.pop_front();
+        delete node;
+    }
 }
 
 Node* Puzzle::bfs() {
@@ -66,12 +82,7 @@ Node* Puzzle::bfs() {
         explored_nodes++;
 
         if (this->check_goal(state)) {
-            while (!frontier.empty()) {
-                Node *node = frontier.front();
-                frontier.pop_front();
-                //node->free();
-                delete node;
-            }
+            free_frontier(frontier);
             return curr;
         }
         explored.push_back(state);
@@ -98,7 +109,65 @@ Node* Puzzle::bfs() {
     return nullptr;
 }
 
-Node* Puzzle::dfs() {
+Node* Puzzle::dls(int max_depth) {
+    Node* root = new Node(this->initial_state);
+    std::vector<Node*> frontier;
+    std::vector<Board> explored;
+    frontier.push_back(root);
+    int explored_nodes = 0;
+
+    while (!frontier.empty()) {
+        Node *curr = frontier.back();
+        frontier.pop_back();
+        Board state = curr->get_state();
+        explored_nodes++;
+
+        if (this->check_goal(state)) {
+            free_frontier(frontier);
+            return curr;
+        }
+        if (curr->get_depth() > max_depth) {
+            free_frontier(frontier);
+            delete curr;
+            return nullptr;
+        }
+
+        std::cout << "Current node depth: " << curr->get_depth() << std::endl;
+        explored.push_back(state);
+
+        std::deque<Node*> children = curr->generate_children();
+        while (!children.empty()) {
+            Node *child = children.front();
+            std::cout << "Child depth: " << child->get_depth() << std::endl;
+
+            children.pop_front();
+            auto alternative = std::find(frontier.begin(), frontier.end(), child);
+            bool should_expand = (std::find(explored.begin(), explored.end(), child->get_state()) == explored.end());
+            if (should_expand && alternative == frontier.end()) {
+                frontier.push_back(child);
+            }
+            else if (alternative != frontier.end() && (*alternative)->get_cost() > child->get_cost() && (*alternative)->get_depth() <= max_depth) {
+                Node *parent = child->get_parent();
+                (*alternative)->update(&parent, child->get_depth(), child->get_cost());
+            }
+            else {
+                delete child->get_parent();
+                delete child;
+            }
+        }
+    }
+    return nullptr;
+}
+
+Node* Puzzle::ids() {
+    for (int i = 0; i < Puzzle::MAX_DEPTH; i++) {
+        std::cout << "Current depth: " << i << std::endl;
+        Node *solution = this->dls(i);
+        if (solution != nullptr) {
+            return solution;
+        }
+        delete solution;
+    }
     return nullptr;
 }
 
@@ -107,7 +176,7 @@ Node* Puzzle::greedy() {
     std::vector<Board> closed;
     std::deque<Node*> leaves;
     leaves.push_back(root);
-    
+
     while (true) {
         if (leaves.empty()) return nullptr;
         Node *curr = leaves.front();

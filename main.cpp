@@ -11,13 +11,15 @@ int main() {
     board.print();
 
     Puzzle puzzle(board);
-    Node *solution = puzzle.solve(BFS);
+    Node *solution = puzzle.solve(IDS);
     std::cout << "---------------------------------------------" << std::endl;
     std::cout << "Solution with Breadth-First Search: " << std::endl;
-    solution->print_solution();
-    solution->get_state().print();
-    std::cout << solution->get_cost() << std::endl;
-    solution->free();
+    if (solution) {
+        solution->print_solution();
+        solution->get_state().print();
+        std::cout << solution->get_cost() << std::endl;
+        solution->free();
+    }
 
     return 0;
 }

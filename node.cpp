@@ -20,7 +20,7 @@ Node::Node(Board &board) {
     this->parent = nullptr;
     this->depth  = 0;
     this->cost   = 0;
-    this->costfn = -1;
+    this->costfn = 0;
     //this->set_cost();
 }
 
@@ -28,8 +28,6 @@ Node::Node(Board &board, Node *parent, int move) {
     this->state  = board;
     this->parent = parent;
     this->moves  = (parent != nullptr) ? parent->moves : this->moves;
-    //this->moves.push_back(move);
-    //std::cout << "Adding new node... Number of movements: " << this->moves.size() << std::endl;
     if (parent == nullptr) {
         this->moves.push_back(move);
         this->depth = 0;
