@@ -47,6 +47,20 @@ Matrix Board::get_matrix() {
     return this->matrix;
 }
 
+int Board::get_element_at(int row, int col) {
+    if (row < 0 || row >= this->dimension || col < 0 || col >= this->dimension) {
+        std::cout << "Invalid position." << std::endl;
+        return -1;
+    } 
+    return this->matrix[row][col];
+}
+
+int Board::get_element_at(Position position) {
+    int row = position.row;
+    int col = position.col;
+    return this->get_element_at(row, col);
+}
+
 /*
 Return the position of the empty spot (pair<int: row, int: col>)
 */
@@ -62,33 +76,6 @@ int Board::get_dimension() {
 }
 
 /*
-Calculate Manhattan Distance
-*/
-int Board::get_manhattan_distance() {
-    int count = 0;
-    int dimension = this->dimension;
-
-    for (int i = 0; i < dimension; i++) {
-        for (int j = 0; j < dimension; j++) {
-            int cell = matrix[i][j];
-            int row = (cell != 0) ? std::floor((cell - 1) / dimension) : dimension - 1;
-            int col = (cell % dimension != 0) ? (cell % dimension) - 1 : dimension - 1;
-            count += std::abs(i - row) + std::abs(j - col);
-        }
-    }
-    return count;
-}
-
-/*
-Swap two elements
-*/
-void swap(int &x, int &y) {
-    int aux = x;
-    x = y;
-    y = aux;
-}
-
-/*
 Move the empty spot towards a direction in a given board
 */
 void Board::move(int direction) {
@@ -101,22 +88,22 @@ void Board::move(int direction) {
     }
     // Move the empty spot one position upward
     if (direction == Board::UP && row > 0) {
-        swap(this->matrix[row][col], this->matrix[row - 1][col]);
+        searchutils::swap(this->matrix[row][col], this->matrix[row - 1][col]);
         this->white_position.row = row - 1;
     }
     // Move the empty spot one position downward
     else if (direction == Board::DOWN && row < size - 1) {
-        swap(this->matrix[row][col], this->matrix[row + 1][col]);
+        searchutils::swap(this->matrix[row][col], this->matrix[row + 1][col]);
         this->white_position.row = row + 1;
     }
     // Move the empty spot one position leftward
     else if (direction == Board::LEFT && col > 0) {
-        swap(this->matrix[row][col], this->matrix[row][col - 1]);
+        searchutils::swap(this->matrix[row][col], this->matrix[row][col - 1]);
         this->white_position.col = col - 1;
     }
     // Move the empty spot one position rightward
     else if (direction == Board::RIGHT && col < size - 1) {
-        swap(this->matrix[row][col], this->matrix[row][col + 1]);
+        searchutils::swap(this->matrix[row][col], this->matrix[row][col + 1]);
         this->white_position.col = col + 1;
     }
 }
@@ -145,4 +132,44 @@ Overloading operator != based on the board matrix
 */
 bool Board::operator!=(const Board board) {
     return this->matrix != board.matrix;
+}
+
+/*
+Calculate Manhattan Distance
+*/
+int searchutils::calculate_manhattan_distance(Board &board) {
+    int count = 0;
+    int dimension = board.get_dimension();
+
+    for (int i = 0; i < dimension; i++) {
+        for (int j = 0; j < dimension; j++) {
+            int cell = board.get_element_at(i, j);
+            int row = (cell != 0) ? std::floor((cell - 1) / dimension) : dimension - 1;
+            int col = (cell % dimension != 0) ? (cell % dimension) - 1 : dimension - 1;
+            count += std::abs(i - row) + std::abs(j - col);
+        }
+    }
+    return count;
+}
+
+int searchutils::calculate_misplaced_nodes(Board &board, Board &goal) {
+    int count = 0;
+    int dimension = board.get_dimension();
+    for (int i = 0; i < dimension; i++) {
+        for (int j = 0; j < dimension; j++) {
+            int board_elem = board.get_element_at(i, j);
+            int goal_elem  = goal.get_element_at(i, j);
+            count += (board_elem == goal_elem && board_elem != Board::WHITE_POSITION);
+        }
+    }
+    return count;
+}
+
+/*
+Swap two elements
+*/
+void searchutils::swap(int &x, int &y) {
+    int aux = x;
+    x = y;
+    y = aux;
 }

@@ -32,9 +32,10 @@ class Board {
         Matrix get_matrix();
         Position get_white_position();
         int get_dimension();
-        int get_manhattan_distance();
-        void move(int direction);
+        int get_element_at(int row, int col);
+        int get_element_at(Position position);
         void print(); 
+        void move(int direction);
 
         // Overloading operators
         bool operator==(const Board board);
@@ -46,5 +47,11 @@ struct compare_board_less_than : public std::binary_function<Board, Board, bool>
         return false; // Always insert element in the end of a set
     }
 };
+
+namespace searchutils {    
+    int calculate_manhattan_distance(Board &board);
+    int calculate_misplaced_nodes(Board &board, Board &goal);
+    void swap(int &a, int &b);
+}
 
 #endif

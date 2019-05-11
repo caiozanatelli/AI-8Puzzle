@@ -22,10 +22,14 @@ class Node {
         Node(Board &board);
         Node(Board &board, int move);
         Node(Board &board, Node *parent, int move);
+
+        void set_test(int x);
+
         //Node(Board &board, int costfn);
         //Node(Board &board, int costfn, Node *parent);
         std::deque<Node*> expand();
         void update(Node **new_parent, int new_depth, int new_cost);
+        void update(Node *node);
         void print_solution();
         void free();
 
@@ -56,7 +60,7 @@ struct compare_nodeptr {
 // Overloading comparison between node pointers by lowest path cost
 struct compare_less_by_cost_nodeptr {
     bool operator()(Node *n1, Node *n2) {
-        return n1->get_cost() < n2->get_cost();
+        return n1->get_cost() > n2->get_cost(); // Take care, C++ STL implements MAX heap
     }
 };
 

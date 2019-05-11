@@ -14,6 +14,9 @@ void Node::set_cost() {
     }
 }
 
+void Node::set_test(int x) {
+    this->cost = x;
+}
 /*
 Constructor with only the board as parameter
 */
@@ -109,6 +112,14 @@ void Node::update(Node **new_parent, int new_depth, int new_cost) {
     this->depth  = new_depth;
 }
 
+void Node::update(Node *node) {
+    this->parent = node->get_parent();
+    this->cost = node->get_cost();
+    this->depth = node->get_depth();
+    this->state = node->get_state();
+    this->moves = node->get_moves();
+    this->costfn = node->get_costfn();
+}
 /*
 Return the moves performed so far to get to the current state
 */

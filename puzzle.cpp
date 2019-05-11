@@ -118,8 +118,7 @@ Node* Puzzle::bfs() {
         for (Node *child : children) {
             Board state = child->get_state();
             bool is_in_explored = (explored.find(state) != explored.end());
-            bool is_in_frontier = (std::find_if(frontier.begin(), frontier.end(), 
-                                    compare_nodeptr(child)) != frontier.end());
+            bool is_in_frontier = (std::find_if(frontier.begin(), frontier.end(), compare_nodeptr(child)) != frontier.end());
             // Is this node not in the frontier or explored set? 
             if (!is_in_explored || !is_in_frontier) {
                 if (this->check_goal(state)) {
@@ -148,9 +147,9 @@ Node* Puzzle::uniform_cost() {
         // Choose the node with lowest cost in frontier
         Node *node = frontier.top();
         frontier.pop();
-        auto node_delete = frontier_nodes.find(node);
+        Node *node_delete = nullptr;
+        for (auto it : frontier_nodes) if (it == node) node_delete = it;            
         frontier_nodes.erase(node_delete);
-
         // Is this node the solution we are searching for?
         Board node_state = node->get_state();
         if (this->check_goal(node_state)) {
@@ -161,19 +160,20 @@ Node* Puzzle::uniform_cost() {
         explored.insert(node_state);
         std::deque<Node*> children = node->expand();
         for (Node *child : children) {
-            Board state = child->get_state();
-            auto in_frontier = frontier_nodes.find(child);
-            bool is_in_explored = (explored.find(state) != explored.end());
-            bool is_in_frontier = in_frontier != frontier_nodes.end();
+            Board child_state = child->get_state();
+            // Check whether child node is already in the frontier
+            Node *in_frontier = nullptr;
+            for (auto it : frontier_nodes) if (it == child) in_frontier = it;
+            bool is_in_explored = (explored.find(child_state) != explored.end());
+            bool is_in_frontier = in_frontier != nullptr;
             // If the node is not in the explored list or frontier, add it to the frontier
             if (!is_in_explored || !is_in_frontier) {
                 frontier.push(child);
                 frontier_nodes.insert(child);
             }
             // If it is in the frontier, replace it if we found a better partial solution (by cost)
-            else if ((*in_frontier)->get_cost() > child->get_cost()) {
-                Node *parent = child->get_parent();
-                (*in_frontier)->update(&parent, child->get_depth(), child->get_cost());
+            else if (is_in_frontier && in_frontier->get_cost() > child->get_cost()) {
+                in_frontier->update(child);
             }
         }
     }
