@@ -14,7 +14,9 @@ void Node::set_cost() {
     }
 }
 
-// Public methods
+/*
+Constructor with only the board as parameter
+*/
 Node::Node(Board &board) {
     this->state  = board;
     this->parent = nullptr;
@@ -24,6 +26,9 @@ Node::Node(Board &board) {
     //this->set_cost();
 }
 
+/*
+Constructor with board, parent and performed move as parameters
+*/
 Node::Node(Board &board, Node *parent, int move) {
     this->state  = board;
     this->parent = parent;
@@ -41,6 +46,9 @@ Node::Node(Board &board, Node *parent, int move) {
     this->moves.push_back(move);
 }
 
+/*
+Free a node
+*/
 void Node::free() {
     if (this->parent != nullptr) {
         this->parent->free();
@@ -64,16 +72,10 @@ void Node::free() {
     //this->set_cost();
 }*/
 
-std::vector<Node> Node::expand() {
-    std::vector<Node> children;
-    Position white = this->state.get_white_position();
-    if (white.col > 0) {
-        //children.push_back(Node())
-    }
-    return children;
-}
-
-std::deque<Node*> Node::generate_children() {
+/*
+Expand a node by performing all the allowed actions to the given state
+*/
+std::deque<Node*> Node::expand() {
     std::deque<Node*> children;
     for (auto move : Board::moves) {
         Board new_board(this->state);
@@ -85,10 +87,9 @@ std::deque<Node*> Node::generate_children() {
     return children;
 }
 
-std::vector<int> Node::get_moves() {
-    return this->moves;
-}
-
+/*
+Print the solution
+*/
 void Node::print_solution() {
     for (int move : this->moves) {
         if (move == Board::UP) std::cout << "UP ";
@@ -99,46 +100,81 @@ void Node::print_solution() {
     std::cout << std::endl;
 }
 
+/*
+Update a node with new parent, depth and cost values
+*/
 void Node::update(Node **new_parent, int new_depth, int new_cost) {
     this->parent = *new_parent;
     this->cost   = new_cost;
     this->depth  = new_depth;
 }
 
-// Getters
+/*
+Return the moves performed so far to get to the current state
+*/
+std::vector<int> Node::get_moves() {
+    return this->moves;
+}
+
+/*
+Return the heuristic cost
+*/
 int Node::get_costfn() {
     return this->costfn;
 }
 
+/*
+Return the path cost
+*/
 int Node::get_cost() {
     return this->cost;
 }
 
+/*
+Return the node depth with regards to the root state
+*/
 int Node::get_depth() {
     return this->depth;
 }
 
+/*
+Return the parent of the current node
+*/
 Node* Node::get_parent() {
     return this->parent;
 }
 
+/*
+Return the state the current node describes
+*/
 Board Node::get_state() {
     return this->state;
 }
 
-// Overloading operators
-bool Node::operator <(Node *node) {
-    return this->cost < node->get_cost();
+/*
+Overloading operator < based on path cost
+*/
+bool Node::operator <(Node &node) {
+    return this->cost < node.get_cost();
 }
 
-bool Node::operator >(Node *node) {
-    return this->cost > node->get_cost();
+/*
+Overloading operator > based on path cost
+*/
+bool Node::operator >(Node &node) {
+    return this->cost > node.get_cost();
 }
 
-bool Node::operator ==(Node *node) {
-    return this->state == node->get_state();
+/*
+Overloading operator == based on state board
+*/
+bool Node::operator ==(Node &node) {
+    return this->state == node.get_state();
 }
 
-bool Node::operator !=(Node *node) {
-    return this->state != node->get_state();
+/*
+Overloading operator != based on state board
+*/
+bool Node::operator !=(Node &node) {
+    return this->state != node.get_state();
 }

@@ -41,4 +41,10 @@ class Board {
         bool operator!=(const Board board);
 };
 
+struct compare_board_less_than : public std::binary_function<Board, Board, bool> {
+    bool operator()(const Board &b1, const Board &b2) const {
+        return false; // Always insert element in the end of a set
+    }
+};
+
 #endif

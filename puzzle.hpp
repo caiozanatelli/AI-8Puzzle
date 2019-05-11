@@ -5,7 +5,8 @@
 #include "node.hpp"
 #include <vector>
 
-enum Algorithm {BFS, IDS, AStar, Greedy};
+// Defining types for search algorithm and heuristics selection
+enum Algorithm {BFS, IDS, UniformCost, AStar, BestFirst, HillClimbing};
 enum Heuristic {ManhattanDistance};
 
 class Puzzle {
@@ -16,11 +17,12 @@ class Puzzle {
         // Private methods
         void build_goal(int dimension);
         Node* bfs();
-        Node* dfs();
         Node* dls(int max_depth);
         Node* ids();
-        Node* greedy();
+        Node* uniform_cost();
         Node* a_star();
+        Node* best_first();
+        Node* hill_climbing();
     public:
         static const int MAX_DEPTH = 10;
         Puzzle(Board &initial_state);

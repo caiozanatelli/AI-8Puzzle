@@ -6,6 +6,7 @@
 int main() {
     Matrix matrix(3, std::vector<int>(3, 0));
     matrix = {{1, 0, 3}, {4, 2, 5}, {7, 8, 6}};
+    
     //matrix = {{1, 0, 3}, {4, 2, 5}, {7, 8, 3}};
     Board board(matrix, 3);
     board.print();
@@ -17,7 +18,8 @@ int main() {
     if (solution) {
         solution->print_solution();
         solution->get_state().print();
-        std::cout << solution->get_cost() << std::endl;
+        std::cout << "Cost:  " << solution->get_cost() << std::endl;
+        std::cout << "Depth: " << solution->get_depth() << std::endl;
         solution->free();
     }
 
