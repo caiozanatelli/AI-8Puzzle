@@ -104,7 +104,7 @@ Node* Puzzle::bfs() {
         return root;
     }
     std::deque<Node*> frontier;
-    std::set<Board, compare_board_less_than> explored;
+    std::set<Board, boardutils::compare_board_less_than> explored;
     frontier.push_back(root);
 
     while (!frontier.empty()) {
@@ -118,7 +118,7 @@ Node* Puzzle::bfs() {
         for (Node *child : children) {
             Board state = child->get_state();
             bool is_in_explored = (explored.find(state) != explored.end());
-            bool is_in_frontier = (std::find_if(frontier.begin(), frontier.end(), compare_nodeptr(child)) != frontier.end());
+            bool is_in_frontier = (std::find_if(frontier.begin(), frontier.end(), nodeutils::compare_nodeptr(child)) != frontier.end());
             // Is this node not in the frontier or explored set? 
             if (!is_in_explored || !is_in_frontier) {
                 if (this->check_goal(state)) {
@@ -137,9 +137,9 @@ Uniform Cost Search (UCS).
 */
 Node* Puzzle::uniform_cost() {
     Node *root = new Node(this->initial_state);
-    std::priority_queue<Node*, std::vector<Node*>, compare_less_by_cost_nodeptr> frontier;
-    std::set<Board, compare_board_less_than> explored;
-    std::set<Node*, compare_node_ptr_less_than> frontier_nodes;
+    std::priority_queue<Node*, std::vector<Node*>, nodeutils::compare_less_by_cost_nodeptr> frontier;
+    std::set<Board, boardutils::compare_board_less_than> explored;
+    std::set<Node*, nodeutils::compare_node_ptr_less_than> frontier_nodes;
     frontier.push(root);
     frontier_nodes.insert(root);
 

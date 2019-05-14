@@ -88,22 +88,22 @@ void Board::move(int direction) {
     }
     // Move the empty spot one position upward
     if (direction == Board::UP && row > 0) {
-        searchutils::swap(this->matrix[row][col], this->matrix[row - 1][col]);
+        boardutils::swap(this->matrix[row][col], this->matrix[row - 1][col]);
         this->white_position.row = row - 1;
     }
     // Move the empty spot one position downward
     else if (direction == Board::DOWN && row < size - 1) {
-        searchutils::swap(this->matrix[row][col], this->matrix[row + 1][col]);
+        boardutils::swap(this->matrix[row][col], this->matrix[row + 1][col]);
         this->white_position.row = row + 1;
     }
     // Move the empty spot one position leftward
     else if (direction == Board::LEFT && col > 0) {
-        searchutils::swap(this->matrix[row][col], this->matrix[row][col - 1]);
+        boardutils::swap(this->matrix[row][col], this->matrix[row][col - 1]);
         this->white_position.col = col - 1;
     }
     // Move the empty spot one position rightward
     else if (direction == Board::RIGHT && col < size - 1) {
-        searchutils::swap(this->matrix[row][col], this->matrix[row][col + 1]);
+        boardutils::swap(this->matrix[row][col], this->matrix[row][col + 1]);
         this->white_position.col = col + 1;
     }
 }
@@ -137,7 +137,7 @@ bool Board::operator!=(const Board board) {
 /*
 Calculate Manhattan Distance
 */
-int searchutils::calculate_manhattan_distance(Board &board) {
+int boardutils::calculate_manhattan_distance(Board &board) {
     int count = 0;
     int dimension = board.get_dimension();
 
@@ -152,7 +152,7 @@ int searchutils::calculate_manhattan_distance(Board &board) {
     return count;
 }
 
-int searchutils::calculate_misplaced_nodes(Board &board, Board &goal) {
+int boardutils::calculate_misplaced_nodes(Board &board, Board &goal) {
     int count = 0;
     int dimension = board.get_dimension();
     for (int i = 0; i < dimension; i++) {
@@ -168,7 +168,7 @@ int searchutils::calculate_misplaced_nodes(Board &board, Board &goal) {
 /*
 Swap two elements
 */
-void searchutils::swap(int &x, int &y) {
+void boardutils::swap(int &x, int &y) {
     int aux = x;
     x = y;
     y = aux;

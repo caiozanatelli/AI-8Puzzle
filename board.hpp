@@ -1,6 +1,7 @@
 #ifndef _BOARD_
 #define _BOARD_
 
+#include <iostream>
 #include <utility>
 #include <vector>
 
@@ -42,13 +43,13 @@ class Board {
         bool operator!=(const Board board);
 };
 
-struct compare_board_less_than : public std::binary_function<Board, Board, bool> {
-    bool operator()(const Board &b1, const Board &b2) const {
-        return false; // Always insert element in the end of a set
-    }
-};
+namespace boardutils {
+    struct compare_board_less_than : public std::binary_function<Board, Board, bool> {
+        bool operator()(const Board &b1, const Board &b2) const {
+            return false; // Always insert element in the end of a set
+        }
+    };
 
-namespace searchutils {    
     int calculate_manhattan_distance(Board &board);
     int calculate_misplaced_nodes(Board &board, Board &goal);
     void swap(int &a, int &b);
