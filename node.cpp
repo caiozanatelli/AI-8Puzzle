@@ -7,7 +7,7 @@
 /*
 Set the proper path cost taking into account heuristic cost functions (greedy or not)
 */
-void nodeutils::set_cost_by_heuristic(Node *node, int (*f_heuristic)(Board), bool greedy) {
+void nodeutils::set_cost_by_heuristic(Node *node, int (*f_heuristic)(const Board&), bool greedy) {
     int costfn = f_heuristic(node->get_state());
     node->set_costfn(costfn);
     if (greedy) {
@@ -16,6 +16,7 @@ void nodeutils::set_cost_by_heuristic(Node *node, int (*f_heuristic)(Board), boo
     else {
         node->set_cost(costfn + node->get_depth());
     }
+    std::cout << "Cost: " << node->get_cost() << std::endl;
 }
 
 /*
@@ -32,7 +33,7 @@ Node::Node(Board &board) {
 /*
 Constructor with board, parent and performed move as parameters
 */
-Node::Node(Board &board, Node *parent, int move, int (*f_heuristic)(Board), bool is_greedy) {
+Node::Node(Board &board, Node *parent, int move, int (*f_heuristic)(const Board&), bool is_greedy) {
     this->state  = board;
     this->parent = parent;
     this->moves  = (parent != nullptr) ? parent->moves : this->moves;
@@ -68,7 +69,7 @@ void Node::free() {
 /*
 Expand a node by performing all the allowed actions to the given state
 */
-std::deque<Node*> Node::expand(int (*f_heuristic)(Board), bool is_greedy) {
+std::deque<Node*> Node::expand(int (*f_heuristic)(const Board&), bool is_greedy) {
     std::deque<Node*> children;
     for (auto move : Board::moves) {
         Board new_board(this->state);

@@ -1,7 +1,5 @@
 #include <iostream>
 #include "puzzle.hpp"
-#include "board.hpp"
-#include "node.hpp"
 
 int main() {
     Matrix matrix(3, std::vector<int>(3, 0));
@@ -13,7 +11,7 @@ int main() {
     board.print();
 
     Puzzle puzzle(board);
-    Node *solution = puzzle.solve(UniformCost);
+    Node *solution = puzzle.solve(puzzleutils::BestFirst);
     std::cout << "---------------------------------------------" << std::endl;
     std::cout << "Solution with Breadth-First Search: " << std::endl;
     if (solution) {

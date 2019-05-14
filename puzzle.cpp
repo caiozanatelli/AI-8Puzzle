@@ -53,26 +53,27 @@ The available algorithms are:
     - Local Search:
         - HillClimbing
 */
-Node* Puzzle::solve(Algorithm algorithm) {
+Node* Puzzle::solve(puzzleutils::Algorithm algorithm, puzzleutils::Heuristic heuristic) {
     Node *solution = nullptr;
+
     switch (algorithm) {
-        case BFS:
+        case puzzleutils::BFS:
             solution = this->bfs();
             break;
-        case IDS:
+        case puzzleutils::IDS:
             solution = this->ids();
             break;
-        case UniformCost:
+        case puzzleutils::UniformCost:
             solution = this->uniform_cost();
             break;
-        case AStar:
-            solution = this->a_star();
+        case puzzleutils::AStar:
+            solution = this->a_star(heuristic);
             break;
-        case BestFirst:
-            solution = this->best_first();
+        case puzzleutils::BestFirst:
+            solution = this->best_first(heuristic);
             break;
-        case HillClimbing:
-            solution = this->hill_climbing();
+        case puzzleutils::HillClimbing:
+            solution = this->hill_climbing(heuristic);
         default:
             std::cout << "This algorithm is not supported." << std::endl;
     }
@@ -252,21 +253,67 @@ Node* Puzzle::ids() {
 /*
 A* Search.
 */
-Node* Puzzle::a_star() {
+Node* Puzzle::a_star(puzzleutils::Heuristic heuristic) {
     return nullptr;
 }
 
 /*
 Greedy Best-First Search.
 */
-Node* Puzzle::best_first() {
+Node* Puzzle::best_first(puzzleutils::Heuristic heuristic) {
+    int (*heuristic_function)(const Board&);
+    heuristic_function = &boardutils::calculate_manhattan_distance;
+
+    Node *root = new Node(this->initial_state);
+    std::priority_queue<Node*, std::vector<Node*>, nodeutils::compare_less_by_cost_nodeptr> frontier;
+    std::set<Board, boardutils::compare_board_less_than> explored;
+    std::set<Node*, nodeutils::compare_node_ptr_less_than> frontier_nodes;
+    frontier.push(root);
+    frontier_nodes.insert(root);
+
+    while (!frontier.empty()) {
+        // Choose the node with lowest cost in frontier
+        Node *node = frontier.top();
+        frontier.pop();
+        Node *node_delete = nullptr;
+        for (auto it : frontier_nodes) if (it == node) node_delete = it;            
+        frontier_nodes.erase(node_delete);
+        // Is this node the solution we are searching for?
+        Board node_state = node->get_state();
+        if (this->check_goal(node_state)) {
+            return node;
+        }
+
+        // Add node to explored list and expand it
+        explored.insert(node_state);
+        std::deque<Node*> children = node->expand(heuristic_function, true);
+
+        for (Node *child : children) {
+            Board child_state = child->get_state();
+            // Check whether child node is already in the frontier
+            Node *in_frontier = nullptr;
+            for (auto it : frontier_nodes) if (it == child) in_frontier = it;
+            bool is_in_explored = (explored.find(child_state) != explored.end());
+            bool is_in_frontier = in_frontier != nullptr;
+            // If the node is not in the explored list or frontier, add it to the frontier
+            if (!is_in_explored || !is_in_frontier) {
+                frontier.push(child);
+                frontier_nodes.insert(child);
+            }
+            // If it is in the frontier, replace it if we found a better partial solution (by cost)
+            else if (is_in_frontier && in_frontier->get_cost() > child->get_cost()) {
+                in_frontier->update(child);
+            }
+        }
+    }
+    // We reached the end without finding the solution
     return nullptr;
 }
 
 /*
 Hill Climbing Search.
 */
-Node* Puzzle::hill_climbing() {
+Node* Puzzle::hill_climbing(puzzleutils::Heuristic heuristic) {
     return nullptr;
 }
 
