@@ -15,32 +15,33 @@ class Node {
         int costfn;
         int cost;
     public:
-        // General methods
+        // Constructors
         Node(Board &board);
         Node(Board &board, Node *parent, int move, int (*f_costfn)(Board), bool is_greedy=true);
 
+        // General methods
         std::deque<Node*> expand(int (*f_heuristic)(Board)=nullptr, bool is_greedy=true);
         void update(Node **new_parent, int new_depth, int new_cost);
         void update(Node *node);
-        void print_solution();
+        void print_solution() const;
         void free();
 
         // Getters & setters
-        int get_costfn();
-        int get_cost();
-        int get_depth();
-        Node *get_parent();
-        Board get_state();
-        std::vector<int> get_moves();
+        int get_costfn() const;
+        int get_cost() const;
+        int get_depth() const;
+        Node *get_parent() const;
+        Board get_state() const;
+        std::vector<int> get_moves() const;
         void set_cost(int cost);
         void set_costfn(int costfn);
         void set_depth(int depth);
         
-        // Overloading operators
-        bool operator <(Node &node);
-        bool operator >(Node &node);
-        bool operator ==(Node &node);
-        bool operator !=(Node &node);
+        // Overloaded operators
+        bool operator <(const Node &node) const;
+        bool operator >(const Node &node) const;
+        bool operator ==(const Node &node) const;
+        bool operator !=(const Node &node) const;
 };
 
 namespace nodeutils {

@@ -20,7 +20,7 @@ Puzzle::Puzzle(Board &initial_state) {
 /*
 Private method for building up the goal for the game (winning final state)
 */
-void Puzzle::build_goal(int dimension) {
+void Puzzle::build_goal(const int dimension) {
     Matrix goal_matrix(dimension, std::vector<int>(dimension, 0));
     int count = 1;
     for (int i = 0; i < dimension; i++) {
@@ -36,7 +36,7 @@ void Puzzle::build_goal(int dimension) {
 /*
 Check whether a given board state is the goal one
 */
-bool Puzzle::check_goal(Board &board) {
+bool Puzzle::check_goal(const Board &board) const {
     return (this->goal == board);
 }
 
@@ -184,7 +184,7 @@ Node* Puzzle::uniform_cost() {
 /*
 Depth-Limited Search (DLS).
 */
-Node* Puzzle::dls(int max_depth) {
+Node* Puzzle::dls(const int max_depth) {
     Node* root = new Node(this->initial_state);
     std::vector<Node*> frontier;
     std::vector<Board> explored;

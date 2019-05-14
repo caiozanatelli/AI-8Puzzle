@@ -19,7 +19,7 @@ class Board {
         Matrix goal;
 
         // Methods
-        Position find_white_position();
+        Position find_white_position() const;
     public:
         const static int WHITE_POSITION = 0;
         const static int UP    = 1;
@@ -31,16 +31,16 @@ class Board {
         Board(const Matrix &matrix, int dimension);
         Board();
         Matrix get_matrix();
-        Position get_white_position();
-        int get_dimension();
-        int get_element_at(int row, int col);
-        int get_element_at(Position position);
-        void print(); 
+        Position get_white_position() const;
+        int get_dimension() const;
+        int get_element_at(int row, int col) const;
+        int get_element_at(Position position) const;
+        void print() const; 
         void move(int direction);
 
         // Overloading operators
-        bool operator==(const Board board);
-        bool operator!=(const Board board);
+        bool operator==(const Board board) const;
+        bool operator!=(const Board board) const;
 };
 
 namespace boardutils {
@@ -50,8 +50,8 @@ namespace boardutils {
         }
     };
 
-    int calculate_manhattan_distance(Board &board);
-    int calculate_misplaced_nodes(Board &board, Board &goal);
+    int calculate_manhattan_distance(const Board &board);
+    int calculate_misplaced_nodes(const Board &board, const Board &goal);
     void swap(int &a, int &b);
 }
 

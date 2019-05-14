@@ -83,7 +83,7 @@ std::deque<Node*> Node::expand(int (*f_heuristic)(Board), bool is_greedy) {
 /*
 Print the solution
 */
-void Node::print_solution() {
+void Node::print_solution() const {
     for (int move : this->moves) {
         if (move == Board::UP) std::cout << "UP ";
         else if (move == Board::DOWN) std::cout << "DOWN ";
@@ -113,14 +113,14 @@ void Node::update(Node *node) {
 /*
 Return the moves performed so far to get to the current state
 */
-std::vector<int> Node::get_moves() {
+std::vector<int> Node::get_moves() const {
     return this->moves;
 }
 
 /*
 Return the heuristic cost
 */
-int Node::get_costfn() {
+int Node::get_costfn() const {
     return this->costfn;
 }
 
@@ -134,7 +134,7 @@ void Node::set_costfn(int costfn) {
 /*
 Return the path cost
 */
-int Node::get_cost() {
+int Node::get_cost() const {
     return this->cost;
 }
 
@@ -148,7 +148,7 @@ void Node::set_cost(int cost) {
 /*
 Return the node depth with regards to the root state
 */
-int Node::get_depth() {
+int Node::get_depth() const {
     return this->depth;
 }
 
@@ -162,41 +162,41 @@ void Node::set_depth(int depth) {
 /*
 Return the parent of the current node
 */
-Node* Node::get_parent() {
+Node* Node::get_parent() const {
     return this->parent;
 }
 
 /*
 Return the state the current node describes
 */
-Board Node::get_state() {
+Board Node::get_state() const {
     return this->state;
 }
 
 /*
 Overloading operator < based on path cost
 */
-bool Node::operator <(Node &node) {
+bool Node::operator <(const Node &node) const {
     return this->cost < node.get_cost();
 }
 
 /*
 Overloading operator > based on path cost
 */
-bool Node::operator >(Node &node) {
+bool Node::operator >(const Node &node) const {
     return this->cost > node.get_cost();
 }
 
 /*
 Overloading operator == based on state board
 */
-bool Node::operator ==(Node &node) {
+bool Node::operator ==(const Node &node) const {
     return this->state == node.get_state();
 }
 
 /*
 Overloading operator != based on state board
 */
-bool Node::operator !=(Node &node) {
+bool Node::operator !=(const Node &node) const {
     return this->state != node.get_state();
 }

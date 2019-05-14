@@ -15,9 +15,9 @@ class Puzzle {
         Board goal;
 
         // Private methods
-        void build_goal(int dimension);
+        void build_goal(const int dimension);
         Node* bfs();
-        Node* dls(int max_depth);
+        Node* dls(const int max_depth);
         Node* ids();
         Node* uniform_cost();
         Node* a_star();
@@ -27,7 +27,7 @@ class Puzzle {
         static const int MAX_DEPTH = 10;
         Puzzle(Board &initial_state);
         Node* solve(Algorithm algorithm);
-        bool check_goal(Board &board);
+        bool check_goal(const Board &board) const;
 };
 
 #endif

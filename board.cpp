@@ -29,7 +29,7 @@ Board::Board() {}
 /*
 Find where the empty spot is located
 */
-Position Board::find_white_position() {
+Position Board::find_white_position() const {
     for (int i = 0; i < this->dimension; i++) {
         for (int j = 0; j < this->dimension; j++) {
             if (this->matrix[i][j] == Board::WHITE_POSITION) {
@@ -47,7 +47,7 @@ Matrix Board::get_matrix() {
     return this->matrix;
 }
 
-int Board::get_element_at(int row, int col) {
+int Board::get_element_at(int row, int col) const {
     if (row < 0 || row >= this->dimension || col < 0 || col >= this->dimension) {
         std::cout << "Invalid position." << std::endl;
         return -1;
@@ -55,7 +55,7 @@ int Board::get_element_at(int row, int col) {
     return this->matrix[row][col];
 }
 
-int Board::get_element_at(Position position) {
+int Board::get_element_at(Position position) const {
     int row = position.row;
     int col = position.col;
     return this->get_element_at(row, col);
@@ -64,14 +64,14 @@ int Board::get_element_at(Position position) {
 /*
 Return the position of the empty spot (pair<int: row, int: col>)
 */
-Position Board::get_white_position() {
+Position Board::get_white_position() const {
     return this->white_position;
 }
 
 /*
 Return the board dimension
 */
-int Board::get_dimension() {
+int Board::get_dimension() const {
     return this->dimension;
 }
 
@@ -111,7 +111,7 @@ void Board::move(int direction) {
 /*
 Print the board
 */
-void Board::print() {
+void Board::print() const {
     for (int i = 0; i < this->dimension; i++) {
         for (int j = 0; j < this->dimension; j++) {
             std::cout << std::setfill(' ') << std::setw(5) << this->matrix[i][j];
@@ -123,21 +123,21 @@ void Board::print() {
 /*
 Overloading operator == based on the board matrix
 */
-bool Board::operator==(const Board board) {
+bool Board::operator==(const Board board) const {
     return this->matrix == board.matrix;
 }
 
 /*
 Overloading operator != based on the board matrix
 */
-bool Board::operator!=(const Board board) {
+bool Board::operator!=(const Board board) const {
     return this->matrix != board.matrix;
 }
 
 /*
 Calculate Manhattan Distance
 */
-int boardutils::calculate_manhattan_distance(Board &board) {
+int boardutils::calculate_manhattan_distance(const Board &board) {
     int count = 0;
     int dimension = board.get_dimension();
 
@@ -152,7 +152,7 @@ int boardutils::calculate_manhattan_distance(Board &board) {
     return count;
 }
 
-int boardutils::calculate_misplaced_nodes(Board &board, Board &goal) {
+int boardutils::calculate_misplaced_nodes(const Board &board, const Board &goal) {
     int count = 0;
     int dimension = board.get_dimension();
     for (int i = 0; i < dimension; i++) {
