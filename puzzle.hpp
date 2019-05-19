@@ -7,20 +7,22 @@
 
 namespace puzzleutils {
     // Defining types for search algorithm and heuristics selection
-    enum Algorithm {BFS, IDS, UniformCost, AStar, BestFirst, HillClimbing};
+    enum Algorithm {BFS, IDS, UCS, AStar, BestFirst, HillClimbing};
     enum Heuristic {ManhattanDistance, MisplacedNodes, None};
 
     class Solution {
         private:
             Node *final_node;
-            int explored;
-            int total_nodes;
-            int steps;
+            unsigned int explored;
+            unsigned int total_nodes;
+            unsigned int steps;
             std::vector<std::string> path;
         public:
-            Solution(Node *&node, int explored, int frontier);
+            Solution();
+            Solution(Node *&node, unsigned int explored, unsigned int frontier);
             void print();
             void trace();
+            bool is_valid();
     };
 
     /* 
@@ -40,17 +42,18 @@ class Puzzle {
 
         // Private methods
         void build_goal(const int dimension);
-        Node* bfs();
-        Node* dls(const int max_depth);
-        Node* ids();
-        Node* uniform_cost();
-        Node* a_star(puzzleutils::Heuristic heuristic);
-        Node* best_first(puzzleutils::Heuristic heuristic);
-        Node* hill_climbing(puzzleutils::Heuristic heuristic, int limit=10);
+        puzzleutils::Solution bfs();
+        puzzleutils::Solution dls(const int max_depth);
+        puzzleutils::Solution ids();
+        puzzleutils::Solution uniform_cost();
+        puzzleutils::Solution a_star(puzzleutils::Heuristic heuristic);
+        puzzleutils::Solution best_first(puzzleutils::Heuristic heuristic);
+        puzzleutils::Solution hill_climbing(puzzleutils::Heuristic heuristic, const int limit=10);
     public:
-        static const int MAX_DEPTH = 10;
+        static const int MAX_DEPTH = 500;
         Puzzle(Board &initial_state);
-        Node* solve(puzzleutils::Algorithm algorithm, puzzleutils::Heuristic heuristic=puzzleutils::ManhattanDistance);
+        puzzleutils::Solution solve(puzzleutils::Algorithm algorithm, 
+                                    puzzleutils::Heuristic heuristic=puzzleutils::ManhattanDistance);
         bool check_goal(const Board &board) const;
 };
 

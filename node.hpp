@@ -17,10 +17,10 @@ class Node {
     public:
         // Constructors
         Node(Board &board);
-        Node(Board &board, Node *parent, int move, int (*f_costfn)(const Board&), bool is_greedy=true);
-
+        Node(Board &board, Node *parent, int move, const Board &goal, 
+            int (*f_costfn)(const Board&, const Board&), bool is_greedy=true);
         // General methods
-        std::deque<Node*> expand(int (*f_heuristic)(const Board&)=nullptr, bool is_greedy=true);
+        std::deque<Node*> expand(const Board &goal, int (*f_heuristic)(const Board&, const Board&)=nullptr, bool is_greedy=true);
         void update(Node **new_parent, int new_depth, int new_cost);
         void update(Node *node);
         void print_solution() const;
@@ -45,7 +45,7 @@ class Node {
 };
 
 namespace nodeutils {
-    void set_cost_by_heuristic(Node *node, int (*f_heuristic)(const Board&), bool greedy=true);
+    void set_cost_by_heuristic(Node *node, int (*f_heuristic)(const Board&, const Board&), const Board &goal, bool greedy=true);
 
     // Overloading comparison between Node pointers 
     struct compare_nodeptr {

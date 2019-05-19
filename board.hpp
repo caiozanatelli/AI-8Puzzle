@@ -51,7 +51,7 @@ namespace boardutils {
         }
     };
 
-    int calculate_manhattan_distance(const Board &board);
+    int calculate_manhattan_distance(const Board &board, const Board &goal);
     int calculate_misplaced_nodes(const Board &board, const Board &goal);
     void swap(int &a, int &b);
 }

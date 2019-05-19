@@ -147,10 +147,9 @@ bool Board::operator!=(const Board board) const {
 /*
 Calculate Manhattan Distance
 */
-int boardutils::calculate_manhattan_distance(const Board &board) {
+int boardutils::calculate_manhattan_distance(const Board &board, const Board &goal) {
     int count = 0;
     int dimension = board.get_dimension();
-
     for (int i = 0; i < dimension; i++) {
         for (int j = 0; j < dimension; j++) {
             int cell = board.get_element_at(i, j);

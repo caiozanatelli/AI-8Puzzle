@@ -7,8 +7,8 @@
 /*
 Set the proper path cost taking into account heuristic cost functions (greedy or not)
 */
-void nodeutils::set_cost_by_heuristic(Node *node, int (*f_heuristic)(const Board&), bool greedy) {
-    int costfn = f_heuristic(node->get_state());
+void nodeutils::set_cost_by_heuristic(Node *node, int (*f_heuristic)(const Board&, const Board&), const Board &goal, bool greedy) {
+    int costfn = f_heuristic(node->get_state(), goal);
     node->set_costfn(costfn);
     if (greedy) {
         node->set_cost(costfn);
@@ -16,7 +16,7 @@ void nodeutils::set_cost_by_heuristic(Node *node, int (*f_heuristic)(const Board
     else {
         node->set_cost(costfn + node->get_depth());
     }
-    std::cout << "Cost: " << node->get_cost() << std::endl;
+    //std::cout << "Cost: " << node->get_cost() << std::endl;
 }
 
 /*
@@ -33,7 +33,8 @@ Node::Node(Board &board) {
 /*
 Constructor with board, parent and performed move as parameters
 */
-Node::Node(Board &board, Node *parent, int move, int (*f_heuristic)(const Board&), bool is_greedy) {
+Node::Node(Board &board, Node *parent, int move, const Board &goal, 
+            int (*f_heuristic)(const Board&, const Board&), bool is_greedy) {
     this->state  = board;
     this->parent = parent;
     this->moves  = (parent != nullptr) ? parent->moves : this->moves;
@@ -50,7 +51,7 @@ Node::Node(Board &board, Node *parent, int move, int (*f_heuristic)(const Board&
             this->cost  = parent->get_cost() + 1;
         }
         else {
-            nodeutils::set_cost_by_heuristic(this, f_heuristic, is_greedy);
+            nodeutils::set_cost_by_heuristic(this, f_heuristic, goal, is_greedy);
         }
     }
     this->moves.push_back(move);
@@ -69,13 +70,13 @@ void Node::free() {
 /*
 Expand a node by performing all the allowed actions to the given state
 */
-std::deque<Node*> Node::expand(int (*f_heuristic)(const Board&), bool is_greedy) {
+std::deque<Node*> Node::expand(const Board &goal, int (*f_heuristic)(const Board&, const Board&), bool is_greedy) {
     std::deque<Node*> children;
     for (auto move : Board::moves) {
         Board new_board(this->state);
         new_board.move(move);
         if (this->state != new_board) {
-            children.push_back(new Node(new_board, this, move, f_heuristic, is_greedy));   
+            children.push_back(new Node(new_board, this, move, goal, f_heuristic, is_greedy));   
         }
     }
     return children;

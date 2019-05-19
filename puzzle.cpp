@@ -9,7 +9,7 @@
 #include <stack>
 #include <set>
 
-puzzleutils::Solution::Solution(Node *&node, int explored, int frontier) {
+puzzleutils::Solution::Solution(Node *&node, unsigned int explored, unsigned int frontier) {
     this->final_node = node;
     this->explored = explored;
     this->total_nodes = explored + frontier;
@@ -17,7 +17,24 @@ puzzleutils::Solution::Solution(Node *&node, int explored, int frontier) {
     this->trace();
 }
 
+puzzleutils::Solution::Solution() {
+    this->final_node = nullptr;
+    this->explored = 0;
+    this->total_nodes = 0;
+    this->steps = 0;
+    this->trace();
+}
+
+bool puzzleutils::Solution::is_valid() {
+    return (this->final_node != nullptr);
+}
+
 void puzzleutils::Solution::print() {
+    if (!this->final_node) {
+        std::cout << "No solution has been found." << std::endl;
+        return;
+    }
+
     std::vector<int> moves = this->final_node->get_moves();
     std::cout << "Solution path:  " << std::endl;
     int index = 0;
@@ -96,8 +113,8 @@ The available algorithms are:
     - Local Search:
         - HillClimbing
 */
-Node* Puzzle::solve(puzzleutils::Algorithm algorithm, puzzleutils::Heuristic heuristic) {
-    Node *solution = nullptr;
+puzzleutils::Solution Puzzle::solve(puzzleutils::Algorithm algorithm, puzzleutils::Heuristic heuristic) {
+    puzzleutils::Solution solution;
 
     switch (algorithm) {
         case puzzleutils::BFS:
@@ -106,7 +123,7 @@ Node* Puzzle::solve(puzzleutils::Algorithm algorithm, puzzleutils::Heuristic heu
         case puzzleutils::IDS:
             solution = this->ids();
             break;
-        case puzzleutils::UniformCost:
+        case puzzleutils::UCS:
             solution = this->uniform_cost();
             break;
         case puzzleutils::AStar:
@@ -117,6 +134,7 @@ Node* Puzzle::solve(puzzleutils::Algorithm algorithm, puzzleutils::Heuristic heu
             break;
         case puzzleutils::HillClimbing:
             solution = this->hill_climbing(heuristic);
+            break;
         default:
             std::cout << "This algorithm is not supported." << std::endl;
     }
@@ -142,15 +160,15 @@ void free_frontier(std::deque<Node*> &frontier) {
 /*
 Breadth-First Search (BFS).
 */
-Node* Puzzle::bfs() {
+puzzleutils::Solution Puzzle::bfs() {
     Node *root = new Node(this->initial_state);
     if (this->check_goal(this->initial_state)) {
-        return root;
+        return puzzleutils::Solution(root, 0, 0);
     }
     std::deque<Node*> frontier;
     std::set<Board, boardutils::compare_board_less_than> explored;
     frontier.push_back(root);
-
+    
     while (!frontier.empty()) {
         // Choose the shallowest node in the frontier
         Node *node = frontier.front();
@@ -158,7 +176,7 @@ Node* Puzzle::bfs() {
         explored.insert(node->get_state());
 
         // Expand the node
-        std::deque<Node*> children = node->expand();
+        std::deque<Node*> children = node->expand(this->goal);
         for (Node *child : children) {
             Board state = child->get_state();
             bool is_in_explored = (explored.find(state) != explored.end());
@@ -166,20 +184,20 @@ Node* Puzzle::bfs() {
             // Is this node not in the frontier or explored set? 
             if (!is_in_explored || !is_in_frontier) {
                 if (this->check_goal(state)) {
-                    return child;
+                    return puzzleutils::Solution(child, explored.size(), frontier.size());
                 }
                 frontier.push_back(child);
             }
         }
     }
     // We reached the end without finding the solution
-    return nullptr;
+    return puzzleutils::Solution();
 }
 
 /*
 Uniform Cost Search (UCS).
 */
-Node* Puzzle::uniform_cost() {
+puzzleutils::Solution Puzzle::uniform_cost() {
     Node *root = new Node(this->initial_state);
     std::priority_queue<Node*, std::vector<Node*>, nodeutils::compare_less_by_cost_nodeptr> frontier;
     std::set<Board, boardutils::compare_board_less_than> explored;
@@ -197,12 +215,12 @@ Node* Puzzle::uniform_cost() {
         // Is this node the solution we are searching for?
         Board node_state = node->get_state();
         if (this->check_goal(node_state)) {
-            return node;
+            return puzzleutils::Solution(node, explored.size(), frontier.size());
         }
 
         // Add node to explored list and expand it
         explored.insert(node_state);
-        std::deque<Node*> children = node->expand();
+        std::deque<Node*> children = node->expand(this->goal);
         for (Node *child : children) {
             Board child_state = child->get_state();
             // Check whether child node is already in the frontier
@@ -222,13 +240,13 @@ Node* Puzzle::uniform_cost() {
         }
     }
     // We reached the end without finding the solution
-    return nullptr;
+    return puzzleutils::Solution();
 }
 
 /*
 Depth-Limited Search (DLS).
 */
-Node* Puzzle::dls(const int max_depth) {
+puzzleutils::Solution Puzzle::dls(const int max_depth) {
     Node* root = new Node(this->initial_state);
     std::vector<Node*> frontier;
     std::vector<Board> explored;
@@ -242,23 +260,22 @@ Node* Puzzle::dls(const int max_depth) {
         explored_nodes++;
 
         if (this->check_goal(state)) {
-            free_frontier(frontier);
-            return curr;
+            //free_frontier(frontier);
+            return puzzleutils::Solution(curr, explored.size(), frontier.size());
         }
         if (curr->get_depth() > max_depth) {
-            free_frontier(frontier);
-            delete curr;
-            return nullptr;
+            //free_frontier(frontier);
+            //delete curr;
+            return puzzleutils::Solution();
         }
 
         std::cout << "Current node depth: " << curr->get_depth() << std::endl;
         explored.push_back(state);
 
-        std::deque<Node*> children = curr->expand();
+        std::deque<Node*> children = curr->expand(this->goal);
         while (!children.empty()) {
             Node *child = children.front();
             std::cout << "Child depth: " << child->get_depth() << std::endl;
-
             children.pop_front();
             auto alternative = std::find(frontier.begin(), frontier.end(), child);
             bool should_expand = (std::find(explored.begin(), explored.end(), child->get_state()) == explored.end());
@@ -269,36 +286,38 @@ Node* Puzzle::dls(const int max_depth) {
                 Node *parent = child->get_parent();
                 (*alternative)->update(&parent, child->get_depth(), child->get_cost());
             }
-            else {
+            /*else {
                 delete child->get_parent();
                 delete child;
-            }
+            }*/
         }
     }
-    return nullptr;
+    return puzzleutils::Solution();
 }
 
 /*
 Iterative Deepening Depth-First Search (IDS).
 */
-Node* Puzzle::ids() {
+puzzleutils::Solution Puzzle::ids() {
     for (int i = 0; i < Puzzle::MAX_DEPTH; i++) {
         std::cout << "Current depth: " << i << std::endl;
-        Node *solution = this->dls(i);
-        if (solution != nullptr) {
+        puzzleutils::Solution solution = this->dls(i);
+        if (solution.is_valid()) {
             return solution;
         }
-        delete solution;
+        //delete solution;
     }
-    return nullptr;
+    return puzzleutils::Solution();
 }
 
 /*
 Greedy Best-First Search.
 */
-Node* Puzzle::best_first(puzzleutils::Heuristic heuristic) {
-    int (*heuristic_function)(const Board&);
-    heuristic_function = &boardutils::calculate_manhattan_distance;
+puzzleutils::Solution Puzzle::best_first(puzzleutils::Heuristic heuristic) {
+    int (*heuristic_function)(const Board&, const Board&);
+    heuristic_function = (heuristic == puzzleutils::ManhattanDistance) ?
+                            &boardutils::calculate_manhattan_distance :
+                            &boardutils::calculate_misplaced_nodes;
 
     Node *root = new Node(this->initial_state);
     std::priority_queue<Node*, std::vector<Node*>, nodeutils::compare_less_by_cost_nodeptr> frontier;
@@ -317,12 +336,12 @@ Node* Puzzle::best_first(puzzleutils::Heuristic heuristic) {
         // Is this node the solution we are searching for?
         Board node_state = node->get_state();
         if (this->check_goal(node_state)) {
-            return node;
+            return puzzleutils::Solution(node, explored.size(), frontier.size());
         }
 
         // Add node to explored list and expand it
         explored.insert(node_state);
-        std::deque<Node*> children = node->expand(heuristic_function, true);
+        std::deque<Node*> children = node->expand(this->goal, heuristic_function, true);
 
         for (Node *child : children) {
             Board child_state = child->get_state();
@@ -343,15 +362,17 @@ Node* Puzzle::best_first(puzzleutils::Heuristic heuristic) {
         }
     }
     // We reached the end without finding the solution
-    return nullptr;
+    return puzzleutils::Solution();
 }
 
 /*
 A* Search.
 */
-Node* Puzzle::a_star(puzzleutils::Heuristic heuristic) {
-    int (*heuristic_function)(const Board&);
-    heuristic_function = &boardutils::calculate_manhattan_distance;
+puzzleutils::Solution Puzzle::a_star(puzzleutils::Heuristic heuristic) {
+    int (*heuristic_function)(const Board&, const Board&);
+    heuristic_function = (heuristic == puzzleutils::ManhattanDistance) ?
+                            &boardutils::calculate_manhattan_distance :
+                            &boardutils::calculate_misplaced_nodes;
 
     Node *root = new Node(this->initial_state);
     std::priority_queue<Node*, std::vector<Node*>, nodeutils::compare_less_by_cost_nodeptr> frontier;
@@ -370,12 +391,12 @@ Node* Puzzle::a_star(puzzleutils::Heuristic heuristic) {
         // Is this node the solution we are searching for?
         Board node_state = node->get_state();
         if (this->check_goal(node_state)) {
-            return node;
+            return puzzleutils::Solution(node, explored.size(), frontier.size());
         }
 
         // Add node to explored list and expand it
         explored.insert(node_state);
-        std::deque<Node*> children = node->expand(heuristic_function, false);
+        std::deque<Node*> children = node->expand(this->goal, heuristic_function, false);
 
         for (Node *child : children) {
             Board child_state = child->get_state();
@@ -396,15 +417,17 @@ Node* Puzzle::a_star(puzzleutils::Heuristic heuristic) {
         }
     }
     // We reached the end without finding the solution
-    return nullptr;
+    return puzzleutils::Solution();
 }
 
 /*
 Hill Climbing Search.
 */
-Node* Puzzle::hill_climbing(puzzleutils::Heuristic heuristic, int limit) {
-    int (*heuristic_function)(const Board&);
-    heuristic_function = &boardutils::calculate_manhattan_distance;
+puzzleutils::Solution Puzzle::hill_climbing(puzzleutils::Heuristic heuristic, const int limit) {
+    int (*heuristic_function)(const Board&, const Board&);
+    heuristic_function = (heuristic == puzzleutils::ManhattanDistance) ?
+                            &boardutils::calculate_manhattan_distance :
+                            &boardutils::calculate_misplaced_nodes;
 
     Node *curr_node = new Node(this->initial_state);
     int slide_moves = 0;
@@ -412,10 +435,10 @@ Node* Puzzle::hill_climbing(puzzleutils::Heuristic heuristic, int limit) {
 
     while (true) {
         steps++;
-        if (slide_moves > limit) return curr_node;
+        if (slide_moves > limit) return puzzleutils::Solution(curr_node, steps, 0);
 
         Node *best_neighbor = nullptr;
-        std::deque<Node*> children = curr_node->expand(heuristic_function, false);
+        std::deque<Node*> children = curr_node->expand(this->goal, heuristic_function, false);
         for (Node *child : children) {
             if (!best_neighbor) {
                 best_neighbor = child;
@@ -427,7 +450,7 @@ Node* Puzzle::hill_climbing(puzzleutils::Heuristic heuristic, int limit) {
         int best_neighbor_cost = best_neighbor->get_cost();
         int curr_node_cost = curr_node->get_cost();
         if (best_neighbor_cost > curr_node_cost) {
-            return curr_node;
+            return puzzleutils::Solution(curr_node, steps, 0);
         }
         if (best_neighbor_cost == curr_node_cost) {
             slide_moves++;
@@ -437,6 +460,5 @@ Node* Puzzle::hill_climbing(puzzleutils::Heuristic heuristic, int limit) {
         }
         curr_node = best_neighbor;
     }
-
-    return nullptr;
+    return puzzleutils::Solution();
 }
