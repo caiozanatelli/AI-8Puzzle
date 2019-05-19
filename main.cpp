@@ -11,16 +11,13 @@ int main() {
     board.print();
 
     Puzzle puzzle(board);
-    Node *solution = puzzle.solve(puzzleutils::BestFirst);
+    Node *final_node = puzzle.solve(puzzleutils::AStar);
     std::cout << "---------------------------------------------" << std::endl;
     std::cout << "Solution with Breadth-First Search: " << std::endl;
-    if (solution) {
-        solution->print_solution();
-        solution->get_state().print();
-        std::cout << "Cost:  " << solution->get_cost() << std::endl;
-        std::cout << "Depth: " << solution->get_depth() << std::endl;
-        solution->free();
-    }
 
+    if (final_node) {
+        puzzleutils::Solution solution(final_node, 0, 0);
+        solution.print();
+    }
     return 0;
 }

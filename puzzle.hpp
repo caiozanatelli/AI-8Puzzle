@@ -10,6 +10,19 @@ namespace puzzleutils {
     enum Algorithm {BFS, IDS, UniformCost, AStar, BestFirst, HillClimbing};
     enum Heuristic {ManhattanDistance, MisplacedNodes, None};
 
+    class Solution {
+        private:
+            Node *final_node;
+            int explored;
+            int total_nodes;
+            int steps;
+            std::vector<std::string> path;
+        public:
+            Solution(Node *&node, int explored, int frontier);
+            void print();
+            void trace();
+    };
+
     /* 
     Return a function pointer to calculate path cost based on he heuristic chosen
     
@@ -33,7 +46,7 @@ class Puzzle {
         Node* uniform_cost();
         Node* a_star(puzzleutils::Heuristic heuristic);
         Node* best_first(puzzleutils::Heuristic heuristic);
-        Node* hill_climbing(puzzleutils::Heuristic heuristic);
+        Node* hill_climbing(puzzleutils::Heuristic heuristic, int limit=10);
     public:
         static const int MAX_DEPTH = 10;
         Puzzle(Board &initial_state);

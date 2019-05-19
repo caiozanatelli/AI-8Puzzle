@@ -36,6 +36,7 @@ class Board {
         int get_element_at(int row, int col) const;
         int get_element_at(Position position) const;
         void print() const; 
+        std::string to_str() const;
         void move(int direction);
 
         // Overloading operators

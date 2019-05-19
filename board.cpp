@@ -1,6 +1,7 @@
 #include <iostream>
 #include <utility>
 #include <iomanip>
+#include <sstream>
 #include <vector>
 #include <cmath>
 #include "board.hpp"
@@ -109,15 +110,24 @@ void Board::move(int direction) {
 }
 
 /*
+Turn the board into a string representation
+*/
+std::string Board::to_str() const {
+    std::ostringstream ss;
+    for (int i = 0; i < this->dimension; i++) {
+        for (int j = 0; j < this->dimension; j++) {
+            ss << std::setfill(' ') << std::setw(5) << this->matrix[i][j];
+        }
+        ss << std::endl;
+    }
+    return ss.str();
+}
+
+/*
 Print the board
 */
 void Board::print() const {
-    for (int i = 0; i < this->dimension; i++) {
-        for (int j = 0; j < this->dimension; j++) {
-            std::cout << std::setfill(' ') << std::setw(5) << this->matrix[i][j];
-        }
-        std::cout << std::endl;
-    }
+    std::cout << this->to_str() << std::endl;
 }
 
 /*

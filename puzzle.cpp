@@ -9,6 +9,49 @@
 #include <stack>
 #include <set>
 
+puzzleutils::Solution::Solution(Node *&node, int explored, int frontier) {
+    this->final_node = node;
+    this->explored = explored;
+    this->total_nodes = explored + frontier;
+    this->steps = 0;
+    this->trace();
+}
+
+void puzzleutils::Solution::print() {
+    std::vector<int> moves = this->final_node->get_moves();
+    std::cout << "Solution path:  " << std::endl;
+    int index = 0;
+    for (std::string board: this->path) {
+        std::cout << "------------------------------------" << std::endl;
+        if (index == 0) {
+            std::cout << ". : Initial State : ." << std::endl;
+        }
+        else {
+            int move = moves[index - 1];
+            std::string direction = (move == Board::UP)    ? "Moving empty spot upwards" :
+                                    (move == Board::DOWN)  ? "Moving empty spot downwards" :
+                                    (move == Board::LEFT)  ? "Moving empty spot leftwards" :
+                                    (move == Board::RIGHT) ? "Moving empty spot rightwards" : "None";
+            std::cout << ". : " << direction << " : ." << std::endl;
+        }
+        std::cout << "------------------------------------" << std::endl << board;
+        index++;
+    }
+    std::cout << "------------------------------------" << std::endl;
+    std::cout << "Expanded nodes: " << this->explored << " / " << this->total_nodes << std::endl;
+    std::cout << "Steps: " << this->steps << std::endl;
+    std::cout << "Depth: " << this->final_node->get_depth() << std::endl;
+}
+
+void puzzleutils::Solution::trace() {
+    Node *curr_node = this->final_node;
+    while (curr_node) {
+        this->path.insert(this->path.begin(), curr_node->get_state().to_str());
+        curr_node = curr_node->get_parent();
+    }
+    this->steps = (int) this->path.size();
+}
+
 /*
 A single constructor for solving the N-Puzzle problem with a given initial board state
 */
@@ -251,13 +294,6 @@ Node* Puzzle::ids() {
 }
 
 /*
-A* Search.
-*/
-Node* Puzzle::a_star(puzzleutils::Heuristic heuristic) {
-    return nullptr;
-}
-
-/*
 Greedy Best-First Search.
 */
 Node* Puzzle::best_first(puzzleutils::Heuristic heuristic) {
@@ -311,33 +347,96 @@ Node* Puzzle::best_first(puzzleutils::Heuristic heuristic) {
 }
 
 /*
-Hill Climbing Search.
+A* Search.
 */
-Node* Puzzle::hill_climbing(puzzleutils::Heuristic heuristic) {
-    return nullptr;
-}
+Node* Puzzle::a_star(puzzleutils::Heuristic heuristic) {
+    int (*heuristic_function)(const Board&);
+    heuristic_function = &boardutils::calculate_manhattan_distance;
 
-/*Node* Puzzle::greedy() {
     Node *root = new Node(this->initial_state);
-    std::vector<Board> closed;
-    std::deque<Node*> leaves;
-    leaves.push_back(root);
+    std::priority_queue<Node*, std::vector<Node*>, nodeutils::compare_less_by_cost_nodeptr> frontier;
+    std::set<Board, boardutils::compare_board_less_than> explored;
+    std::set<Node*, nodeutils::compare_node_ptr_less_than> frontier_nodes;
+    frontier.push(root);
+    frontier_nodes.insert(root);
 
-    while (true) {
-        if (leaves.empty()) return nullptr;
-        Node *curr = leaves.front();
-        leaves.pop_front();
-        Board state = curr->get_state();
-        if (state == goal) return curr;
-        if (std::find(closed.begin(), closed.end(), state) == closed.end()) {
-            closed.push_back(state);
-            std::deque<Node*> children = curr->generate_children();
-            while (!children.empty()) {
-                leaves.push_back(children.front());
-                children.pop_front();
+    while (!frontier.empty()) {
+        // Choose the node with lowest cost in frontier
+        Node *node = frontier.top();
+        frontier.pop();
+        Node *node_delete = nullptr;
+        for (auto it : frontier_nodes) if (it == node) node_delete = it;            
+        frontier_nodes.erase(node_delete);
+        // Is this node the solution we are searching for?
+        Board node_state = node->get_state();
+        if (this->check_goal(node_state)) {
+            return node;
+        }
+
+        // Add node to explored list and expand it
+        explored.insert(node_state);
+        std::deque<Node*> children = node->expand(heuristic_function, false);
+
+        for (Node *child : children) {
+            Board child_state = child->get_state();
+            // Check whether child node is already in the frontier
+            Node *in_frontier = nullptr;
+            for (auto it : frontier_nodes) if (it == child) in_frontier = it;
+            bool is_in_explored = (explored.find(child_state) != explored.end());
+            bool is_in_frontier = in_frontier != nullptr;
+            // If the node is not in the explored list or frontier, add it to the frontier
+            if (!is_in_explored || !is_in_frontier) {
+                frontier.push(child);
+                frontier_nodes.insert(child);
+            }
+            // If it is in the frontier, replace it if we found a better partial solution (by cost)
+            else if (is_in_frontier && in_frontier->get_cost() > child->get_cost()) {
+                in_frontier->update(child);
             }
         }
     }
+    // We reached the end without finding the solution
     return nullptr;
-} 
+}
+
+/*
+Hill Climbing Search.
 */
+Node* Puzzle::hill_climbing(puzzleutils::Heuristic heuristic, int limit) {
+    int (*heuristic_function)(const Board&);
+    heuristic_function = &boardutils::calculate_manhattan_distance;
+
+    Node *curr_node = new Node(this->initial_state);
+    int slide_moves = 0;
+    int steps = 0;
+
+    while (true) {
+        steps++;
+        if (slide_moves > limit) return curr_node;
+
+        Node *best_neighbor = nullptr;
+        std::deque<Node*> children = curr_node->expand(heuristic_function, false);
+        for (Node *child : children) {
+            if (!best_neighbor) {
+                best_neighbor = child;
+            }
+            else if (child->get_cost() < best_neighbor->get_cost()) {
+                best_neighbor = child;
+            }
+        }
+        int best_neighbor_cost = best_neighbor->get_cost();
+        int curr_node_cost = curr_node->get_cost();
+        if (best_neighbor_cost > curr_node_cost) {
+            return curr_node;
+        }
+        if (best_neighbor_cost == curr_node_cost) {
+            slide_moves++;
+        }
+        else {
+            slide_moves = 0;
+        }
+        curr_node = best_neighbor;
+    }
+
+    return nullptr;
+}
