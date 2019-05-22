@@ -50,7 +50,7 @@ class Puzzle {
         puzzleutils::Solution best_first(puzzleutils::Heuristic heuristic);
         puzzleutils::Solution hill_climbing(puzzleutils::Heuristic heuristic, const int limit=10);
     public:
-        static const int MAX_DEPTH = 500;
+        static const int MAX_DEPTH = 10000;
         Puzzle(Board &initial_state);
         puzzleutils::Solution solve(puzzleutils::Algorithm algorithm, 
                                     puzzleutils::Heuristic heuristic=puzzleutils::ManhattanDistance);
