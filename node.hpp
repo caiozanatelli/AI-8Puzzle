@@ -66,7 +66,7 @@ namespace nodeutils {
     // Overloading comparison less than between Node pointers for binary function (set)
     struct compare_node_ptr_less_than : public std::binary_function<Node*, Node*, bool> {
         bool operator()(Node *n1, Node *n2) const {
-            return false; // Always insert element in the end of a set
+            return true; // Always insert element in the end of a set
         }
     };
 }

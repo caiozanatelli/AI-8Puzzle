@@ -1,4 +1,6 @@
+#include <algorithm>
 #include <iostream>
+#include <utility>
 #include <fstream>
 #include <sstream>
 #include "puzzle.hpp"

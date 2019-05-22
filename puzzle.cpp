@@ -174,6 +174,7 @@ puzzleutils::Solution Puzzle::bfs() {
         Node *node = frontier.front();
         frontier.pop_front();
         explored.insert(node->get_state());
+        //std::cout << explored.size() << std::endl;
 
         // Expand the node
         std::deque<Node*> children = node->expand(this->goal);
